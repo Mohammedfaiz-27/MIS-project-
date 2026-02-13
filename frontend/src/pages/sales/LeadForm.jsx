@@ -6,7 +6,11 @@ import { leadsService } from '../../services/leads'
 import { masterDataService } from '../../services/masterData'
 import { CONSTRUCTION_STAGES, LEAD_TYPES, LEAD_STATUSES, BUILDER_TYPES } from '../../utils/constants'
 import toast from 'react-hot-toast'
+<<<<<<< HEAD
 import { FiArrowLeft, FiPlus, FiUpload, FiX } from 'react-icons/fi'
+=======
+import { FiArrowLeft, FiPlus } from 'react-icons/fi'
+>>>>>>> e727aed77a36c429e664da79c1785ce98a0a4f46
 
 export default function LeadForm() {
   const navigate = useNavigate()
@@ -21,8 +25,11 @@ export default function LeadForm() {
   const [newArea, setNewArea] = useState('')
   const [newSteel, setNewSteel] = useState('')
   const [newCite, setNewCement] = useState('')
+<<<<<<< HEAD
   const [selectedFiles, setSelectedFiles] = useState([])
   const [filePreviews, setFilePreviews] = useState([])
+=======
+>>>>>>> e727aed77a36c429e664da79c1785ce98a0a4f46
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm()
 
@@ -101,6 +108,7 @@ export default function LeadForm() {
     } catch (e) {}
   }
 
+<<<<<<< HEAD
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files).slice(0, 5 - selectedFiles.length)
     const newPreviews = files.map(file => URL.createObjectURL(file))
@@ -122,6 +130,10 @@ export default function LeadForm() {
       }
       return lead
     },
+=======
+  const createMutation = useMutation({
+    mutationFn: leadsService.create,
+>>>>>>> e727aed77a36c429e664da79c1785ce98a0a4f46
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leads'] })
       toast.success('Lead created successfully!')
@@ -133,6 +145,7 @@ export default function LeadForm() {
   })
 
   const updateMutation = useMutation({
+<<<<<<< HEAD
     mutationFn: async ({ id, data }) => {
       const lead = await leadsService.update(id, data)
       if (selectedFiles.length > 0) {
@@ -140,6 +153,9 @@ export default function LeadForm() {
       }
       return lead
     },
+=======
+    mutationFn: ({ id, data }) => leadsService.update(id, data),
+>>>>>>> e727aed77a36c429e664da79c1785ce98a0a4f46
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leads'] })
       queryClient.invalidateQueries({ queryKey: ['lead', id] })
@@ -447,6 +463,7 @@ export default function LeadForm() {
             />
           </div>
 
+<<<<<<< HEAD
           {/* Site Photos Upload */}
           <div className="border-b pb-6">
             <h2 className="text-lg font-semibold mb-4">Site Photos</h2>
@@ -515,6 +532,8 @@ export default function LeadForm() {
             )}
           </div>
 
+=======
+>>>>>>> e727aed77a36c429e664da79c1785ce98a0a4f46
           <div className="flex gap-4">
             <button
               type="submit"
