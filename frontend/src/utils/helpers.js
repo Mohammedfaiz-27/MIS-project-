@@ -2,7 +2,11 @@ import { format, parseISO, isValid } from 'date-fns'
 
 export const formatDate = (date, formatStr = 'MMM dd, yyyy') => {
   if (!date) return '-'
-  const parsed = typeof date === 'string' ? parseISO(date) : date
+  let d = date
+  if (typeof d === 'string' && d.includes('T') && !d.endsWith('Z') && !d.includes('+') && !d.includes('-', 10)) {
+    d = d + 'Z'
+  }
+  const parsed = typeof d === 'string' ? parseISO(d) : d
   return isValid(parsed) ? format(parsed, formatStr) : '-'
 }
 

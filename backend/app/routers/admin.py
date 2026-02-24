@@ -8,7 +8,7 @@ import io
 from ..schemas.user import UserCreate, UserUpdate, UserResponse
 from ..database import get_database
 from ..services.auth_service import AuthService
-from ..utils.security import require_admin
+from ..utils.security import require_admin, get_password_hash
 from ..utils.helpers import serialize_doc
 
 router = APIRouter()
@@ -59,6 +59,10 @@ async def update_user(
         )
 
     update_dict = {k: v for k, v in update_data.model_dump().items() if v is not None}
+    if "password" in update_dict:
+        plain = update_dict.pop("password")
+        update_dict["password_hash"] = get_password_hash(plain)
+        update_dict["password_plain"] = plain
     update_dict["updated_at"] = datetime.utcnow()
 
     await db.users.update_one(
@@ -91,9 +95,9 @@ async def export_leads(
     if start_date or end_date:
         date_filter = {}
         if start_date:
-            date_filter["$gte"] = start_date
+            date_filter["$gte"] = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
         if end_date:
-            date_filter["$lte"] = end_date
+            date_filter["$lte"] = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
         filter_dict["created_at"] = date_filter
 
     # Get leads with user info
@@ -230,9 +234,9 @@ async def export_sales_entries(
     if start_date or end_date:
         date_filter = {}
         if start_date:
-            date_filter["$gte"] = start_date
+            date_filter["$gte"] = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
         if end_date:
-            date_filter["$lte"] = end_date
+            date_filter["$lte"] = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
         filter_dict["created_at"] = date_filter
 
     # Get entries with lookup

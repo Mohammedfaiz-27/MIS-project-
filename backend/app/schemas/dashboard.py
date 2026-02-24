@@ -13,12 +13,15 @@ class KPICard(BaseModel):
 class KPIResponse(BaseModel):
     total_leads: KPICard
     hot_leads: KPICard
+    warm_leads: KPICard
+    cold_leads: KPICard
     pending_followups: KPICard
     overdue_followups: KPICard
     total_steel_kg: KPICard
     total_cement_bags: KPICard
     conversion_rate: KPICard
     pending_approvals: KPICard
+    total_won: KPICard
 
 
 class FollowupTableItem(BaseModel):

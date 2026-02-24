@@ -16,6 +16,7 @@ class UserUpdate(BaseModel):
     name: Optional[str] = None
     phone: Optional[str] = None
     is_active: Optional[bool] = None
+    password: Optional[str] = Field(None, min_length=6)
 
 
 class UserResponse(BaseModel):
@@ -25,6 +26,7 @@ class UserResponse(BaseModel):
     role: UserRole
     phone: Optional[str] = None
     is_active: bool
+    password_plain: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
 

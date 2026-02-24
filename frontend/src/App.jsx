@@ -8,6 +8,7 @@ import LeadDetails from './pages/sales/LeadDetails'
 import FollowupForm from './pages/sales/FollowupForm'
 import SalesEntryForm from './pages/sales/SalesEntryForm'
 import MyFollowups from './pages/sales/MyFollowups'
+import MySales from './pages/sales/MySales'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AllLeads from './pages/admin/AllLeads'
 import FollowupControl from './pages/admin/FollowupControl'
@@ -57,6 +58,7 @@ function App() {
         <Route path="leads/:id/followup" element={<FollowupForm />} />
         <Route path="leads/:id/sales-entry" element={<SalesEntryForm />} />
         <Route path="followups" element={<MyFollowups />} />
+        <Route path="my-sales" element={<MySales />} />
 
         {/* Admin Routes */}
         <Route path="admin/dashboard" element={

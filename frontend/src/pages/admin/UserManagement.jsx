@@ -5,13 +5,16 @@ import { adminService } from '../../services/admin'
 import Modal from '../../components/common/Modal'
 import { USER_ROLES } from '../../utils/constants'
 import { formatDate } from '../../utils/helpers'
-import { FiPlus, FiEdit, FiUserCheck, FiUserX } from 'react-icons/fi'
+import { FiPlus, FiUserCheck, FiUserX, FiKey, FiEye, FiEyeOff } from 'react-icons/fi'
 import toast from 'react-hot-toast'
 
 export default function UserManagement() {
   const queryClient = useQueryClient()
   const [modalOpen, setModalOpen] = useState(false)
   const [editingUser, setEditingUser] = useState(null)
+  const [resetPasswordUser, setResetPasswordUser] = useState(null)
+  const [newPassword, setNewPassword] = useState('')
+  const [visiblePasswords, setVisiblePasswords] = useState({})
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm()
 
@@ -49,11 +52,35 @@ export default function UserManagement() {
     createMutation.mutate(data)
   }
 
+  const resetPasswordMutation = useMutation({
+    mutationFn: ({ id, password }) => adminService.resetPassword(id, password),
+    onSuccess: () => {
+      setResetPasswordUser(null)
+      setNewPassword('')
+      toast.success('Password reset successfully!')
+    },
+    onError: () => {
+      toast.error('Failed to reset password')
+    }
+  })
+
   const toggleUserStatus = (user) => {
     updateMutation.mutate({
       id: user.id,
       data: { is_active: !user.is_active }
     })
+  }
+
+  const handleResetPassword = () => {
+    if (!newPassword || newPassword.length < 6) {
+      toast.error('Password must be at least 6 characters')
+      return
+    }
+    resetPasswordMutation.mutate({ id: resetPasswordUser.id, password: newPassword })
+  }
+
+  const togglePasswordVisibility = (userId) => {
+    setVisiblePasswords(prev => ({ ...prev, [userId]: !prev[userId] }))
   }
 
   const openCreateModal = () => {
@@ -92,6 +119,7 @@ export default function UserManagement() {
                 <th>Email</th>
                 <th>Role</th>
                 <th>Phone</th>
+                <th>Password</th>
                 <th>Status</th>
                 <th>Created</th>
                 <th>Actions</th>
@@ -105,6 +133,28 @@ export default function UserManagement() {
                   <td className="capitalize">{user.role}</td>
                   <td>{user.phone || '-'}</td>
                   <td>
+                    {user.password_plain ? (
+                      <div className="flex items-center gap-1">
+                        <span className="font-mono text-sm">
+                          {visiblePasswords[user.id] ? user.password_plain : '••••••••'}
+                        </span>
+                        <button
+                          onClick={() => togglePasswordVisibility(user.id)}
+                          className="p-1 text-gray-400 hover:text-gray-700"
+                          title={visiblePasswords[user.id] ? 'Hide' : 'Show'}
+                        >
+                          {visiblePasswords[user.id] ? (
+                            <FiEyeOff className="w-4 h-4" />
+                          ) : (
+                            <FiEye className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-gray-400 text-sm">-</span>
+                    )}
+                  </td>
+                  <td>
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                       user.is_active
                         ? 'bg-green-100 text-green-800'
@@ -115,21 +165,30 @@ export default function UserManagement() {
                   </td>
                   <td>{formatDate(user.created_at)}</td>
                   <td>
-                    <button
-                      onClick={() => toggleUserStatus(user)}
-                      className={`p-2 rounded ${
-                        user.is_active
-                          ? 'text-red-600 hover:bg-red-50'
-                          : 'text-green-600 hover:bg-green-50'
-                      }`}
-                      title={user.is_active ? 'Deactivate' : 'Activate'}
-                    >
-                      {user.is_active ? (
-                        <FiUserX className="w-5 h-5" />
-                      ) : (
-                        <FiUserCheck className="w-5 h-5" />
-                      )}
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => toggleUserStatus(user)}
+                        className={`p-2 rounded ${
+                          user.is_active
+                            ? 'text-red-600 hover:bg-red-50'
+                            : 'text-green-600 hover:bg-green-50'
+                        }`}
+                        title={user.is_active ? 'Deactivate' : 'Activate'}
+                      >
+                        {user.is_active ? (
+                          <FiUserX className="w-5 h-5" />
+                        ) : (
+                          <FiUserCheck className="w-5 h-5" />
+                        )}
+                      </button>
+                      <button
+                        onClick={() => { setResetPasswordUser(user); setNewPassword('') }}
+                        className="p-2 rounded text-blue-600 hover:bg-blue-50"
+                        title="Reset Password"
+                      >
+                        <FiKey className="w-5 h-5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -137,6 +196,42 @@ export default function UserManagement() {
           </table>
         </div>
       )}
+
+      {/* Reset Password Modal */}
+      <Modal
+        isOpen={!!resetPasswordUser}
+        onClose={() => { setResetPasswordUser(null); setNewPassword('') }}
+        title={`Reset Password - ${resetPasswordUser?.name}`}
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="label">New Password *</label>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="input"
+              placeholder="Minimum 6 characters"
+            />
+          </div>
+          <div className="flex gap-4 justify-end pt-2">
+            <button
+              type="button"
+              onClick={() => { setResetPasswordUser(null); setNewPassword('') }}
+              className="btn btn-secondary"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleResetPassword}
+              disabled={resetPasswordMutation.isPending}
+              className="btn btn-primary"
+            >
+              {resetPasswordMutation.isPending ? 'Resetting...' : 'Reset Password'}
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Create User Modal */}
       <Modal

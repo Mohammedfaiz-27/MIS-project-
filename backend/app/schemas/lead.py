@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List
 from datetime import datetime
+import re
 from ..models.lead import ConstructionStage, LeadType, LeadStatus, BuilderType
 
 
@@ -23,12 +24,19 @@ class LeadCreate(BaseModel):
 
     # Customer Details
     customer_name: str = Field(..., min_length=2)
-    phone_number: str = Field(..., min_length=10)
+    phone_number: str = Field(..., min_length=10, max_length=10)
     occupation: Optional[str] = None
     builder_type: BuilderType
 
+    @field_validator('phone_number')
+    @classmethod
+    def validate_phone_number(cls, v):
+        if not re.match(r'^[6-9]\d{9}$', v):
+            raise ValueError('Enter a valid 10-digit Indian mobile number')
+        return v
+
     # Follow-up
-    next_followup_date: datetime
+    next_followup_date: Optional[datetime] = None
 
     # Remarks
     remarks: Optional[str] = None
@@ -42,12 +50,14 @@ class LeadUpdate(BaseModel):
     other_brands: Optional[List[str]] = None
     construction_stage: Optional[ConstructionStage] = None
     lead_type: Optional[LeadType] = None
+    lead_status: Optional[LeadStatus] = None
     customer_name: Optional[str] = None
     phone_number: Optional[str] = None
     occupation: Optional[str] = None
     builder_type: Optional[BuilderType] = None
     next_followup_date: Optional[datetime] = None
     remarks: Optional[str] = None
+    lost_reason: Optional[str] = None
 
 
 class LeadStageUpdate(BaseModel):
@@ -78,6 +88,7 @@ class LeadResponse(BaseModel):
     sales_person_id: str
     sales_person_name: Optional[str] = None
     remarks: Optional[str] = None
+    lost_reason: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
 

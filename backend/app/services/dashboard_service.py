@@ -33,9 +33,9 @@ class DashboardService:
         if start_date or end_date:
             date_filter = {}
             if start_date:
-                date_filter["$gte"] = start_date
+                date_filter["$gte"] = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
             if end_date:
-                date_filter["$lte"] = end_date
+                date_filter["$lte"] = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
             lead_filter["created_at"] = date_filter
 
         # Total leads
@@ -44,6 +44,14 @@ class DashboardService:
         # Hot leads
         hot_filter = {**lead_filter, "lead_type": LeadType.HOT}
         hot_leads = await db.leads.count_documents(hot_filter)
+
+        # Warm leads
+        warm_filter = {**lead_filter, "lead_type": LeadType.WARM}
+        warm_leads = await db.leads.count_documents(warm_filter)
+
+        # Cold leads
+        cold_filter = {**lead_filter, "lead_type": LeadType.COLD}
+        cold_leads = await db.leads.count_documents(cold_filter)
 
         # Pending followups (follow_up status with future/today date)
         pending_filter = {
@@ -101,12 +109,15 @@ class DashboardService:
         return {
             "total_leads": {"label": "Total Leads", "value": total_leads},
             "hot_leads": {"label": "Hot Leads", "value": hot_leads},
+            "warm_leads": {"label": "Warm Leads", "value": warm_leads},
+            "cold_leads": {"label": "Cold Leads", "value": cold_leads},
             "pending_followups": {"label": "Pending Follow-ups", "value": pending_followups},
             "overdue_followups": {"label": "Overdue Follow-ups", "value": overdue_followups},
             "total_steel_kg": {"label": "Total Steel (kg)", "value": total_steel},
             "total_cement_bags": {"label": "Total Cement (bags)", "value": total_cement},
             "conversion_rate": {"label": "Conversion Rate", "value": round(conversion_rate, 1)},
-            "pending_approvals": {"label": "Pending Approvals", "value": pending_approvals}
+            "pending_approvals": {"label": "Pending Approvals", "value": pending_approvals},
+            "total_won": {"label": "Total Won", "value": won_leads}
         }
 
     @staticmethod
@@ -153,13 +164,18 @@ class DashboardService:
             },
             {
                 "$addFields": {
-                    "sales_person_name": {"$arrayElemAt": ["$sales_person.name", 0]},
+                    "sales_person_name": {"$ifNull": [{"$arrayElemAt": ["$sales_person.name", 0]}, ""]},
                     "pending_days": {
-                        "$dateDiff": {
-                            "startDate": "$next_followup_date",
-                            "endDate": today,
-                            "unit": "day"
-                        }
+                        "$ifNull": [
+                            {
+                                "$dateDiff": {
+                                    "startDate": "$next_followup_date",
+                                    "endDate": today,
+                                    "unit": "day"
+                                }
+                            },
+                            0
+                        ]
                     },
                     "is_overdue": {"$lt": ["$next_followup_date", today]}
                 }
@@ -196,9 +212,9 @@ class DashboardService:
         if start_date or end_date:
             date_filter = {}
             if start_date:
-                date_filter["$gte"] = start_date
+                date_filter["$gte"] = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
             if end_date:
-                date_filter["$lte"] = end_date
+                date_filter["$lte"] = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
             lead_filter["created_at"] = date_filter
 
         pipeline = [
@@ -328,9 +344,9 @@ class DashboardService:
         if start_date or end_date:
             date_filter = {}
             if start_date:
-                date_filter["$gte"] = start_date
+                date_filter["$gte"] = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
             if end_date:
-                date_filter["$lte"] = end_date
+                date_filter["$lte"] = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
             lead_filter["created_at"] = date_filter
 
         pipeline = [

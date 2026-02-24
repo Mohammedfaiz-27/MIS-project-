@@ -20,6 +20,8 @@ export default function LeadDetails() {
   const queryClient = useQueryClient()
   const [showUpload, setShowUpload] = useState(false)
   const [uploadFiles, setUploadFiles] = useState([])
+  const [showLostForm, setShowLostForm] = useState(false)
+  const [lostReason, setLostReason] = useState('')
 
   const { data: lead, isLoading } = useQuery({
     queryKey: ['lead', id],
@@ -51,11 +53,49 @@ export default function LeadDetails() {
 
   const statusMutation = useMutation({
     mutationFn: (status) => leadsService.updateStatus(id, status),
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['lead', id] })
       toast.success('Status updated!')
+      if (variables === 'won') {
+        navigate(`/leads/${id}/sales-entry`)
+      } else if (variables === 'follow_up') {
+        navigate(`/leads/${id}/followup`)
+      }
+    },
+    onError: () => {
+      toast.error('Failed to update status')
     }
   })
+
+  const lostMutation = useMutation({
+    mutationFn: (reason) => leadsService.update(id, { lead_status: 'lost', lost_reason: reason }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lead', id] })
+      toast.success('Lead marked as lost!')
+      setShowLostForm(false)
+      setLostReason('')
+    },
+    onError: () => {
+      toast.error('Failed to update status')
+    }
+  })
+
+  const handleStatusClick = (statusValue) => {
+    if (lead?.lead_status === statusValue) return
+    if (statusValue === 'lost') {
+      setShowLostForm(true)
+      return
+    }
+    statusMutation.mutate(statusValue)
+  }
+
+  const handleLostConfirm = () => {
+    if (!lostReason.trim()) {
+      toast.error('Please enter a reason for losing this lead')
+      return
+    }
+    lostMutation.mutate(lostReason.trim())
+  }
 
   const handleUpload = () => {
     if (uploadFiles.length > 0) {
@@ -116,20 +156,24 @@ export default function LeadDetails() {
               <FiEdit className="w-4 h-4" />
               Edit
             </button>
-            <button
-              onClick={() => navigate(`/leads/${id}/followup`)}
-              className="btn btn-primary flex items-center gap-2"
-            >
-              <FiCalendar className="w-4 h-4" />
-              Add Follow-up
-            </button>
-            <button
-              onClick={() => navigate(`/leads/${id}/sales-entry`)}
-              className="btn btn-success flex items-center gap-2"
-            >
-              <FiDollarSign className="w-4 h-4" />
-              Add Sales Entry
-            </button>
+            {lead.lead_status === 'follow_up' && (
+              <button
+                onClick={() => navigate(`/leads/${id}/followup`)}
+                className="btn btn-primary flex items-center gap-2"
+              >
+                <FiCalendar className="w-4 h-4" />
+                Add Follow-up
+              </button>
+            )}
+            {lead.lead_status === 'won' && (
+              <button
+                onClick={() => navigate(`/leads/${id}/sales-entry`)}
+                className="btn btn-success flex items-center gap-2"
+              >
+                <FiDollarSign className="w-4 h-4" />
+                Add Sales Entry
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -172,6 +216,12 @@ export default function LeadDetails() {
                 <p className="mt-1">{lead.remarks}</p>
               </div>
             )}
+            {lead.lost_reason && (
+              <div className="mt-4 pt-4 border-t">
+                <label className="text-sm text-gray-500">Lost Reason</label>
+                <p className="mt-1 text-red-600">{lead.lost_reason}</p>
+              </div>
+            )}
           </div>
 
           {/* Visit History */}
@@ -185,6 +235,11 @@ export default function LeadDetails() {
                       <div>
                         <p className="font-medium">{formatDateTime(visit.visit_date)}</p>
                         <p className="text-sm text-gray-600 mt-1">{visit.remarks}</p>
+                        {visit.next_followup_date && (
+                          <p className="text-sm text-primary-600 mt-1">
+                            Next Follow-up: {formatDateTime(visit.next_followup_date)}
+                          </p>
+                        )}
                       </div>
                       <span className="text-sm text-gray-500">
                         Stage: {CONSTRUCTION_STAGES.find(s => s.value === visit.construction_stage_at_visit)?.label}
@@ -235,8 +290,12 @@ export default function LeadDetails() {
               {LEAD_STATUSES.map((status) => (
                 <button
                   key={status.value}
-                  onClick={() => statusMutation.mutate(status.value)}
-                  disabled={lead.lead_status === status.value}
+                  onClick={() => handleStatusClick(status.value)}
+                  disabled={
+                    lead.lead_status === status.value ||
+                    statusMutation.isPending ||
+                    lostMutation.isPending
+                  }
                   className={`w-full p-3 rounded-lg text-left transition-colors ${
                     lead.lead_status === status.value
                       ? 'bg-primary-100 border-2 border-primary-500'
@@ -247,6 +306,40 @@ export default function LeadDetails() {
                 </button>
               ))}
             </div>
+
+            {/* Inline Lost Reason Form */}
+            {showLostForm && (
+              <div className="mt-4 p-4 bg-red-50 rounded-lg border border-red-200">
+                <p className="text-sm font-medium text-red-800 mb-2">
+                  Reason for losing this lead *
+                </p>
+                <textarea
+                  value={lostReason}
+                  onChange={(e) => setLostReason(e.target.value)}
+                  className="input text-sm"
+                  rows={3}
+                  placeholder="Enter reason..."
+                />
+                <div className="flex gap-2 mt-3">
+                  <button
+                    onClick={handleLostConfirm}
+                    disabled={lostMutation.isPending}
+                    className="btn btn-primary text-sm py-1.5"
+                  >
+                    {lostMutation.isPending ? 'Saving...' : 'Confirm Lost'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowLostForm(false)
+                      setLostReason('')
+                    }}
+                    className="btn btn-secondary text-sm py-1.5"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Photos */}

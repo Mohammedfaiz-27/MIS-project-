@@ -21,6 +21,7 @@ class AuthService:
         user_doc = {
             "email": user_data.email,
             "password_hash": get_password_hash(user_data.password),
+            "password_plain": user_data.password,
             "name": user_data.name,
             "role": user_data.role,
             "phone": user_data.phone,

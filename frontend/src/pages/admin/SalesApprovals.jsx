@@ -1,15 +1,17 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 import { salesEntriesService } from '../../services/salesEntries'
 import DataTable from '../../components/common/DataTable'
 import StatusBadge from '../../components/common/StatusBadge'
 import Modal from '../../components/common/Modal'
 import { APPROVAL_STATUSES } from '../../utils/constants'
 import { formatDate, formatNumber } from '../../utils/helpers'
-import { FiCheck, FiX } from 'react-icons/fi'
+import { FiCheck, FiX, FiEye } from 'react-icons/fi'
 import toast from 'react-hot-toast'
 
 export default function SalesApprovals() {
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState('pending')
@@ -101,29 +103,39 @@ export default function SalesApprovals() {
       key: 'actions',
       label: 'Actions',
       render: (_, row) => (
-        row.approval_status === 'pending' ? (
-          <div className="flex gap-2">
-            <button
-              onClick={() => approveMutation.mutate(row.id)}
-              disabled={approveMutation.isPending}
-              className="p-2 text-green-600 hover:bg-green-50 rounded"
-              title="Approve"
-            >
-              <FiCheck className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => setRejectModal({ isOpen: true, entryId: row.id })}
-              className="p-2 text-red-600 hover:bg-red-50 rounded"
-              title="Reject"
-            >
-              <FiX className="w-5 h-5" />
-            </button>
-          </div>
-        ) : row.rejection_reason ? (
-          <span className="text-sm text-gray-500">
-            Reason: {row.rejection_reason}
-          </span>
-        ) : null
+        <div className="flex gap-2 items-center">
+          <button
+            onClick={() => navigate(`/leads/${row.lead_id}`)}
+            className="p-2 text-gray-600 hover:bg-gray-50 rounded"
+            title="View Lead"
+          >
+            <FiEye className="w-5 h-5" />
+          </button>
+          {row.approval_status === 'pending' && (
+            <>
+              <button
+                onClick={() => approveMutation.mutate(row.id)}
+                disabled={approveMutation.isPending}
+                className="p-2 text-green-600 hover:bg-green-50 rounded"
+                title="Approve"
+              >
+                <FiCheck className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setRejectModal({ isOpen: true, entryId: row.id })}
+                className="p-2 text-red-600 hover:bg-red-50 rounded"
+                title="Reject"
+              >
+                <FiX className="w-5 h-5" />
+              </button>
+            </>
+          )}
+          {row.rejection_reason && (
+            <span className="text-sm text-gray-500">
+              {row.rejection_reason}
+            </span>
+          )}
+        </div>
       )
     }
   ]

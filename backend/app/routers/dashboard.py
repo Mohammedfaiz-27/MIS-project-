@@ -50,7 +50,11 @@ async def get_followup_table(
         overdue_only=overdue_only
     )
 
-    items = [serialize_doc(item) for item in result["items"]]
+    items = []
+    for item in result["items"]:
+        serialized = serialize_doc(item)
+        serialized["lead_id"] = serialized.get("id", "")
+        items.append(serialized)
     pagination_info = paginate(page, page_size, result["total"])
 
     return {

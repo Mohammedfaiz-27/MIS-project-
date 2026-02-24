@@ -8,11 +8,7 @@ import GlobalFilters from '../../components/common/GlobalFilters'
 import StatusBadge from '../../components/common/StatusBadge'
 import { LEAD_TYPES, LEAD_STATUSES } from '../../utils/constants'
 import { formatDate, buildQueryParams } from '../../utils/helpers'
-<<<<<<< HEAD
 import { FiEye, FiDownload, FiImage } from 'react-icons/fi'
-=======
-import { FiEye, FiDownload } from 'react-icons/fi'
->>>>>>> e727aed77a36c429e664da79c1785ce98a0a4f46
 import { adminService } from '../../services/admin'
 import { downloadBlob } from '../../utils/helpers'
 import toast from 'react-hot-toast'
@@ -44,11 +40,8 @@ export default function AllLeads() {
     }
   }
 
-<<<<<<< HEAD
   const [previewImage, setPreviewImage] = useState(null)
 
-=======
->>>>>>> e727aed77a36c429e664da79c1785ce98a0a4f46
   const columns = [
     {
       key: 'customer_name',
@@ -61,7 +54,6 @@ export default function AllLeads() {
       )
     },
     {
-<<<<<<< HEAD
       key: 'site_photos',
       label: 'Site Photo',
       render: (value) => (
@@ -83,8 +75,6 @@ export default function AllLeads() {
       )
     },
     {
-=======
->>>>>>> e727aed77a36c429e664da79c1785ce98a0a4f46
       key: 'site_location_name',
       label: 'Site Location',
       render: (value, row) => (
@@ -172,7 +162,6 @@ export default function AllLeads() {
         isLoading={isLoading}
         emptyMessage="No leads found"
       />
-<<<<<<< HEAD
 
       {/* Image Preview Modal */}
       {previewImage && (
@@ -195,8 +184,6 @@ export default function AllLeads() {
           </div>
         </div>
       )}
-=======
->>>>>>> e727aed77a36c429e664da79c1785ce98a0a4f46
     </div>
   )
 }

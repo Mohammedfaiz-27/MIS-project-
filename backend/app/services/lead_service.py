@@ -45,9 +45,10 @@ class LeadService:
             "visit_date": datetime.utcnow(),
             "construction_stage_at_visit": lead_data.construction_stage,
             "remarks": lead_data.remarks or "Initial visit",
-            "next_followup_date": lead_data.next_followup_date,
             "created_at": datetime.utcnow()
         }
+        if lead_data.next_followup_date:
+            visit_doc["next_followup_date"] = lead_data.next_followup_date
         await db.visits.insert_one(visit_doc)
 
         return lead_doc
@@ -121,9 +122,9 @@ class LeadService:
         if start_date or end_date:
             date_filter = {}
             if start_date:
-                date_filter["$gte"] = start_date
+                date_filter["$gte"] = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
             if end_date:
-                date_filter["$lte"] = end_date
+                date_filter["$lte"] = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
             filter_dict["created_at"] = date_filter
 
         # Get total count

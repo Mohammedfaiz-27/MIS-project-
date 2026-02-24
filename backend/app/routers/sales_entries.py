@@ -137,9 +137,9 @@ async def get_all_entries(
     if start_date or end_date:
         date_filter = {}
         if start_date:
-            date_filter["$gte"] = start_date
+            date_filter["$gte"] = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
         if end_date:
-            date_filter["$lte"] = end_date
+            date_filter["$lte"] = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
         filter_dict["created_at"] = date_filter
 
     # Get total count

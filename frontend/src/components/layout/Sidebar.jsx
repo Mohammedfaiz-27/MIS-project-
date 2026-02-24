@@ -3,12 +3,13 @@ import { useAuthStore } from '../../store/authStore'
 import {
   FiHome, FiUsers, FiCalendar, FiDollarSign,
   FiBarChart2, FiMap, FiSettings, FiDatabase, FiFileText,
-  FiUserPlus, FiCheckSquare
+  FiUserPlus, FiCheckSquare, FiTrendingUp
 } from 'react-icons/fi'
 
 const salesLinks = [
   { to: '/leads', icon: FiUsers, label: 'My Leads' },
   { to: '/followups', icon: FiCalendar, label: 'Follow-ups' },
+  { to: '/my-sales', icon: FiTrendingUp, label: 'My Sales' },
 ]
 
 const adminLinks = [

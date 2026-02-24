@@ -17,6 +17,11 @@ export const adminService = {
     return response.data
   },
 
+  resetPassword: async (id, password) => {
+    const response = await api.put(`/admin/users/${id}`, { password })
+    return response.data
+  },
+
   // Exports
   exportLeads: async (params = {}) => {
     const response = await api.get('/admin/export/leads', {

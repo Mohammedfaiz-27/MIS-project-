@@ -3,14 +3,11 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { leadsService } from '../../services/leads'
+import { salesEntriesService } from '../../services/salesEntries'
 import { masterDataService } from '../../services/masterData'
 import { CONSTRUCTION_STAGES, LEAD_TYPES, LEAD_STATUSES, BUILDER_TYPES } from '../../utils/constants'
 import toast from 'react-hot-toast'
-<<<<<<< HEAD
 import { FiArrowLeft, FiPlus, FiUpload, FiX } from 'react-icons/fi'
-=======
-import { FiArrowLeft, FiPlus } from 'react-icons/fi'
->>>>>>> e727aed77a36c429e664da79c1785ce98a0a4f46
 
 export default function LeadForm() {
   const navigate = useNavigate()
@@ -25,13 +22,12 @@ export default function LeadForm() {
   const [newArea, setNewArea] = useState('')
   const [newSteel, setNewSteel] = useState('')
   const [newCite, setNewCement] = useState('')
-<<<<<<< HEAD
   const [selectedFiles, setSelectedFiles] = useState([])
   const [filePreviews, setFilePreviews] = useState([])
-=======
->>>>>>> e727aed77a36c429e664da79c1785ce98a0a4f46
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm()
+
+  const leadStatus = watch('lead_status')
 
   const { data: areas, refetch: refetchAreas } = useQuery({
     queryKey: ['masterData', 'area'],
@@ -108,7 +104,6 @@ export default function LeadForm() {
     } catch (e) {}
   }
 
-<<<<<<< HEAD
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files).slice(0, 5 - selectedFiles.length)
     const newPreviews = files.map(file => URL.createObjectURL(file))
@@ -124,18 +119,22 @@ export default function LeadForm() {
 
   const createMutation = useMutation({
     mutationFn: async (payload) => {
-      const lead = await leadsService.create(payload)
+      const { steel_quantity_kg, cement_quantity_bags, ...leadPayload } = payload
+      const lead = await leadsService.create(leadPayload)
       if (selectedFiles.length > 0) {
         await leadsService.uploadPhotos(lead.id, selectedFiles)
       }
+      if (leadPayload.lead_status === 'won' && (steel_quantity_kg || cement_quantity_bags)) {
+        await salesEntriesService.create(lead.id, {
+          steel_quantity_kg: Number(steel_quantity_kg) || 0,
+          cement_quantity_bags: Number(cement_quantity_bags) || 0
+        })
+      }
       return lead
     },
-=======
-  const createMutation = useMutation({
-    mutationFn: leadsService.create,
->>>>>>> e727aed77a36c429e664da79c1785ce98a0a4f46
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leads'] })
+      queryClient.invalidateQueries({ queryKey: ['salesEntries'] })
       toast.success('Lead created successfully!')
       navigate('/leads')
     },
@@ -145,20 +144,24 @@ export default function LeadForm() {
   })
 
   const updateMutation = useMutation({
-<<<<<<< HEAD
     mutationFn: async ({ id, data }) => {
-      const lead = await leadsService.update(id, data)
+      const { steel_quantity_kg, cement_quantity_bags, ...leadPayload } = data
+      const lead = await leadsService.update(id, leadPayload)
       if (selectedFiles.length > 0) {
         await leadsService.uploadPhotos(id, selectedFiles)
       }
+      if (leadPayload.lead_status === 'won' && (steel_quantity_kg || cement_quantity_bags)) {
+        await salesEntriesService.create(id, {
+          steel_quantity_kg: Number(steel_quantity_kg) || 0,
+          cement_quantity_bags: Number(cement_quantity_bags) || 0
+        })
+      }
       return lead
     },
-=======
-    mutationFn: ({ id, data }) => leadsService.update(id, data),
->>>>>>> e727aed77a36c429e664da79c1785ce98a0a4f46
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leads'] })
       queryClient.invalidateQueries({ queryKey: ['lead', id] })
+      queryClient.invalidateQueries({ queryKey: ['salesEntries'] })
       toast.success('Lead updated successfully!')
       navigate(`/leads/${id}`)
     },
@@ -168,9 +171,11 @@ export default function LeadForm() {
   })
 
   const onSubmit = (data) => {
-    const payload = {
-      ...data,
-      next_followup_date: new Date(data.next_followup_date).toISOString()
+    const payload = { ...data }
+    if (data.next_followup_date) {
+      payload.next_followup_date = new Date(data.next_followup_date).toISOString()
+    } else {
+      delete payload.next_followup_date
     }
 
     if (isEdit) {
@@ -280,12 +285,22 @@ export default function LeadForm() {
               <div>
                 <label className="label">Phone Number *</label>
                 <input
+                  type="tel"
+                  maxLength={10}
                   {...register('phone_number', {
                     required: 'Required',
-                    minLength: { value: 10, message: 'At least 10 digits' }
+                    pattern: {
+                      value: /^[6-9]\d{9}$/,
+                      message: 'Enter a valid 10-digit Indian mobile number'
+                    }
                   })}
+                  onKeyDown={(e) => {
+                    if (!/[0-9]/.test(e.key) && !['Backspace','Delete','Tab','ArrowLeft','ArrowRight'].includes(e.key)) {
+                      e.preventDefault()
+                    }
+                  }}
                   className="input"
-                  placeholder="10-digit phone number"
+                  placeholder="e.g., 9876543210"
                 />
                 {errors.phone_number && (
                   <p className="text-red-500 text-sm mt-1">{errors.phone_number.message}</p>
@@ -319,9 +334,9 @@ export default function LeadForm() {
             <h2 className="text-lg font-semibold mb-4">Materials</h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="label">Steel Brand</label>
+                <label className="label">Steel Brand *</label>
                 <div className="flex gap-2">
-                  <select {...register('steel_brand')} className="input flex-1">
+                  <select {...register('steel_brand', { required: 'Required' })} className="input flex-1">
                     <option value="">Select Steel Brand</option>
                     {steelBrands?.map(b => (
                       <option key={b.id} value={b.value}>{b.value}</option>
@@ -356,11 +371,14 @@ export default function LeadForm() {
                     </button>
                   </div>
                 )}
+                {errors.steel_brand && (
+                  <p className="text-red-500 text-sm mt-1">{errors.steel_brand.message}</p>
+                )}
               </div>
               <div>
-                <label className="label">Cement Brand</label>
+                <label className="label">Cement Brand *</label>
                 <div className="flex gap-2">
-                  <select {...register('cement_brand')} className="input flex-1">
+                  <select {...register('cement_brand', { required: 'Required' })} className="input flex-1">
                     <option value="">Select Cement Brand</option>
                     {cementBrands?.map(b => (
                       <option key={b.id} value={b.value}>{b.value}</option>
@@ -395,6 +413,9 @@ export default function LeadForm() {
                     </button>
                   </div>
                 )}
+                {errors.cement_brand && (
+                  <p className="text-red-500 text-sm mt-1">{errors.cement_brand.message}</p>
+                )}
               </div>
             </div>
           </div>
@@ -416,12 +437,16 @@ export default function LeadForm() {
                 )}
               </div>
               <div>
-                <label className="label">Lead Type</label>
-                <select {...register('lead_type')} className="input">
+                <label className="label">Lead Type *</label>
+                <select {...register('lead_type', { required: 'Required' })} className="input">
+                  <option value="">Select Lead Type</option>
                   {LEAD_TYPES.map(t => (
                     <option key={t.value} value={t.value}>{t.label}</option>
                   ))}
                 </select>
+                {errors.lead_type && (
+                  <p className="text-red-500 text-sm mt-1">{errors.lead_type.message}</p>
+                )}
               </div>
               <div>
                 <label className="label">Lead Status</label>
@@ -434,36 +459,87 @@ export default function LeadForm() {
             </div>
           </div>
 
-          {/* Follow-up */}
-          <div className="border-b pb-6">
-            <h2 className="text-lg font-semibold mb-4">Follow-up</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="label">Next Follow-up Date *</label>
-                <input
-                  type="datetime-local"
-                  {...register('next_followup_date', { required: 'Required' })}
-                  className="input"
-                />
-                {errors.next_followup_date && (
-                  <p className="text-red-500 text-sm mt-1">{errors.next_followup_date.message}</p>
-                )}
+          {/* Sales Entry Details - shown when Won is selected */}
+          {leadStatus === 'won' && (
+            <div className="border-b pb-6">
+              <h2 className="text-lg font-semibold mb-4">Sales Entry Details</h2>
+              <p className="text-sm text-yellow-600 bg-yellow-50 p-3 rounded-lg mb-4">
+                This entry will be submitted for admin approval.
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="label">Steel Quantity (kg) *</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    {...register('steel_quantity_kg', {
+                      required: leadStatus === 'won' ? 'Required' : false,
+                      min: { value: 0, message: 'Must be 0 or more' }
+                    })}
+                    className="input"
+                    placeholder="Enter steel quantity in kg"
+                  />
+                  {errors.steel_quantity_kg && (
+                    <p className="text-red-500 text-sm mt-1">{errors.steel_quantity_kg.message}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="label">Cement Quantity (bags) *</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    {...register('cement_quantity_bags', {
+                      required: leadStatus === 'won' ? 'Required' : false,
+                      min: { value: 0, message: 'Must be 0 or more' }
+                    })}
+                    className="input"
+                    placeholder="Enter cement quantity in bags"
+                  />
+                  {errors.cement_quantity_bags && (
+                    <p className="text-red-500 text-sm mt-1">{errors.cement_quantity_bags.message}</p>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Follow-up - only shown when follow_up status is selected */}
+          {(!leadStatus || leadStatus === 'follow_up') && (
+            <div className="border-b pb-6">
+              <h2 className="text-lg font-semibold mb-4">Follow-up</h2>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="label">Next Follow-up Date</label>
+                  <input
+                    type="datetime-local"
+                    {...register('next_followup_date')}
+                    className="input"
+                  />
+                  {errors.next_followup_date && (
+                    <p className="text-red-500 text-sm mt-1">{errors.next_followup_date.message}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Remarks */}
           <div>
-            <label className="label">Remarks</label>
+            <label className="label">Remarks *</label>
             <textarea
-              {...register('remarks')}
+              {...register('remarks', {
+                required: 'Required',
+                minLength: { value: 5, message: 'At least 5 characters' }
+              })}
               className="input"
               rows={3}
               placeholder="Any additional notes..."
             />
+            {errors.remarks && (
+              <p className="text-red-500 text-sm mt-1">{errors.remarks.message}</p>
+            )}
           </div>
 
-<<<<<<< HEAD
           {/* Site Photos Upload */}
           <div className="border-b pb-6">
             <h2 className="text-lg font-semibold mb-4">Site Photos</h2>
@@ -532,8 +608,6 @@ export default function LeadForm() {
             )}
           </div>
 
-=======
->>>>>>> e727aed77a36c429e664da79c1785ce98a0a4f46
           <div className="flex gap-4">
             <button
               type="submit"

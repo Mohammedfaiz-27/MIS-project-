@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
-import { FiLogOut, FiPlus } from 'react-icons/fi'
+import { FiLogOut } from 'react-icons/fi'
 
 export default function Header() {
   const navigate = useNavigate()
@@ -21,16 +21,6 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-4">
-          {user?.role !== 'admin' && (
-            <button
-              onClick={() => navigate('/leads/new')}
-              className="btn btn-primary flex items-center gap-2"
-            >
-              <FiPlus className="w-4 h-4" />
-              New Lead
-            </button>
-          )}
-
           <button
             onClick={handleLogout}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
