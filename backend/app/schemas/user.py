@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from typing import Optional
 from datetime import datetime
 from ..models.user import UserRole
@@ -10,6 +10,13 @@ class UserCreate(BaseModel):
     name: str = Field(..., min_length=2)
     role: UserRole = UserRole.SALESPERSON
     phone: Optional[str] = None
+
+    @field_validator("email")
+    @classmethod
+    def email_domain_must_be_arckitraders(cls, v):
+        if not str(v).endswith("@arckitraders.com"):
+            raise ValueError("Email must use the @arckitraders.com domain")
+        return v
 
 
 class UserUpdate(BaseModel):

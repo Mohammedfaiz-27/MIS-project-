@@ -33,7 +33,7 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary-600">Construction MIS</h1>
+          <h1 className="text-3xl font-bold text-primary-600">Arcki Traders</h1>
           <p className="text-gray-500 mt-2">Sign in to your account</p>
         </div>
 
@@ -86,9 +86,9 @@ export default function Login() {
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-gray-200 text-center text-sm text-gray-500">
-            <p>Default Admin: admin@construction.com / admin123</p>
-          </div>
+          {/* <div className="mt-6 pt-6 border-t border-gray-200 text-center text-sm text-gray-500"> */}
+            {/* <p>Default Admin: admin@arckitraders.com / admin123</p> */}
+          {/* </div> */}
         </div>
       </div>
     </div>

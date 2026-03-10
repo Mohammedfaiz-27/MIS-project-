@@ -86,7 +86,7 @@ export default function UserManagement() {
   const openCreateModal = () => {
     setEditingUser(null)
     reset({
-      email: '',
+      email: '@arckitraders.com',
       password: '',
       name: '',
       role: 'salesperson',
@@ -256,9 +256,12 @@ export default function UserManagement() {
             <label className="label">Email *</label>
             <input
               type="email"
-              {...register('email', { required: 'Required' })}
+              {...register('email', {
+                required: 'Required',
+                validate: (v) => v.endsWith('@arckitraders.com') || 'Email must use @arckitraders.com domain'
+              })}
               className="input"
-              placeholder="email@example.com"
+              placeholder="name@arckitraders.com"
             />
             {errors.email && (
               <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>

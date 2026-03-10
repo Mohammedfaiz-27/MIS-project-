@@ -92,17 +92,32 @@ class AuthService:
 
     @staticmethod
     async def create_default_admin():
-        """Create default admin user if no users exist."""
+        """Create default admin user if no users exist, and migrate old email if present."""
         db = get_database()
+
+        # Migrate old emails if they still exist in the database
+        email_migrations = {
+            "admin@construction.com": "admin@arckitraders.com",
+            "sathish@construction.com": "sathish@arckitraders.com",
+        }
+        for old_email, new_email in email_migrations.items():
+            old = await db.users.find_one({"email": old_email})
+            if old:
+                await db.users.update_one(
+                    {"_id": old["_id"]},
+                    {"$set": {"email": new_email}}
+                )
+                print(f"Migrated email: {old_email} -> {new_email}")
+
         count = await db.users.count_documents({})
 
         if count == 0:
             admin_data = UserCreate(
-                email="admin@construction.com",
+                email="admin@arckitraders.com",
                 password="admin123",
                 name="Admin User",
                 role=UserRole.ADMIN,
                 phone="1234567890"
             )
             await AuthService.create_user(admin_data)
-            print("Default admin user created: admin@construction.com / admin123")
+            print("Default admin user created: admin@arckitraders.com / admin123")

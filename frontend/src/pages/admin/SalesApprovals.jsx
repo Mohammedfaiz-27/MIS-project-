@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { salesEntriesService } from '../../services/salesEntries'
+import { useFilterStore } from '../../store/filterStore'
 import DataTable from '../../components/common/DataTable'
+import GlobalFilters from '../../components/common/GlobalFilters'
 import StatusBadge from '../../components/common/StatusBadge'
 import Modal from '../../components/common/Modal'
 import { APPROVAL_STATUSES } from '../../utils/constants'
-import { formatDate, formatNumber } from '../../utils/helpers'
+import { formatDate, formatNumber, buildQueryParams } from '../../utils/helpers'
 import { FiCheck, FiX, FiEye } from 'react-icons/fi'
 import toast from 'react-hot-toast'
 
@@ -17,13 +19,17 @@ export default function SalesApprovals() {
   const [statusFilter, setStatusFilter] = useState('pending')
   const [rejectModal, setRejectModal] = useState({ isOpen: false, entryId: null })
   const [rejectReason, setRejectReason] = useState('')
+  const { filters } = useFilterStore()
+
+  useEffect(() => { setPage(1) }, [filters])
 
   const { data, isLoading } = useQuery({
-    queryKey: ['salesEntries', 'admin', page, statusFilter],
+    queryKey: ['salesEntries', 'admin', page, statusFilter, filters],
     queryFn: () => salesEntriesService.getAll({
       page,
       page_size: 20,
-      approval_status: statusFilter || undefined
+      approval_status: statusFilter || undefined,
+      ...buildQueryParams(filters)
     })
   })
 
@@ -142,6 +148,8 @@ export default function SalesApprovals() {
 
   return (
     <div>
+      <GlobalFilters showLeadFilters={false} />
+
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Sales Entry Approvals</h1>
         <select

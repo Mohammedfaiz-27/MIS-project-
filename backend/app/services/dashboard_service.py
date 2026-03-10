@@ -76,6 +76,14 @@ class DashboardService:
         elif sales_person_id:
             entry_filter["sales_person_id"] = ObjectId(sales_person_id)
 
+        if start_date or end_date:
+            entry_date_filter = {}
+            if start_date:
+                entry_date_filter["$gte"] = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            if end_date:
+                entry_date_filter["$lte"] = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
+            entry_filter["created_at"] = entry_date_filter
+
         entry_filter["approval_status"] = ApprovalStatus.APPROVED
 
         pipeline = [

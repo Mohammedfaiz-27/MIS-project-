@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { leadsService } from '../../services/leads'
@@ -14,6 +14,8 @@ export default function LeadsList() {
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const { filters } = useFilterStore()
+
+  useEffect(() => { setPage(1) }, [filters])
 
   const { data, isLoading } = useQuery({
     queryKey: ['leads', page, filters],

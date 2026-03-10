@@ -1,19 +1,24 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { salesEntriesService } from '../../services/salesEntries'
+import { useFilterStore } from '../../store/filterStore'
+import GlobalFilters from '../../components/common/GlobalFilters'
 import StatusBadge from '../../components/common/StatusBadge'
 import { APPROVAL_STATUSES } from '../../utils/constants'
-import { formatDate } from '../../utils/helpers'
+import { formatDate, buildQueryParams } from '../../utils/helpers'
 import { FiEye } from 'react-icons/fi'
 
 export default function MySales() {
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
+  const { filters } = useFilterStore()
+
+  useEffect(() => { setPage(1) }, [filters])
 
   const { data, isLoading } = useQuery({
-    queryKey: ['mySales', page],
-    queryFn: () => salesEntriesService.getAll({ page, page_size: 20 })
+    queryKey: ['mySales', page, filters],
+    queryFn: () => salesEntriesService.getAll({ page, page_size: 20, ...buildQueryParams(filters) })
   })
 
   const entries = data?.entries || []
@@ -27,6 +32,8 @@ export default function MySales() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">My Sales</h1>
       </div>
+
+      <GlobalFilters showLeadFilters={false} />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-3 gap-4 mb-6">

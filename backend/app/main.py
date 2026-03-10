@@ -23,8 +23,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Construction MIS API",
-    description="Management Information System for Construction Company",
+    title="Arcki Traders API",
+    description="Management Information System for Arcki Traders",
     version="1.0.0",
     lifespan=lifespan,
     redirect_slashes=False
@@ -55,7 +55,7 @@ app.include_router(master_data.router, prefix="/api/master-data", tags=["Master 
 
 @app.get("/")
 async def root():
-    return {"message": "Construction MIS API", "version": "1.0.0"}
+    return {"message": "Arcki Traders API", "version": "1.0.0"}
 
 
 @app.get("/health")
