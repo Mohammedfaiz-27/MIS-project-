@@ -48,7 +48,7 @@ export default function MyFollowups() {
       <h1 className="text-2xl font-bold text-gray-900 mb-6">My Follow-ups</h1>
 
       {/* Tabs */}
-      <div className="flex gap-4 mb-6">
+      <div className="flex flex-wrap gap-2 mb-6">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -82,30 +82,30 @@ export default function MyFollowups() {
               onClick={() => navigate(`/leads/${followup.id}`)}
               className="card cursor-pointer hover:shadow-md transition-shadow"
             >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
                     <h3 className="font-semibold text-gray-900">{followup.customer_name}</h3>
                     <StatusBadge status={followup.lead_type} statusList={LEAD_TYPES} />
                     {followup.is_overdue && (
                       <span className="flex items-center gap-1 text-red-600 text-sm">
                         <FiAlertCircle className="w-4 h-4" />
-                        {followup.pending_days} days overdue
+                        {followup.pending_days}d overdue
                       </span>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
+                  <div className="flex flex-wrap gap-3 mt-2 text-sm text-gray-600">
                     <span className="flex items-center gap-1">
-                      <FiPhone className="w-4 h-4" />
+                      <FiPhone className="w-4 h-4 shrink-0" />
                       {followup.phone_number}
                     </span>
                     <span className="flex items-center gap-1">
-                      <FiMapPin className="w-4 h-4" />
+                      <FiMapPin className="w-4 h-4 shrink-0" />
                       {followup.site_location_name}, {followup.area}
                     </span>
                     <span className="flex items-center gap-1">
-                      <FiCalendar className="w-4 h-4" />
+                      <FiCalendar className="w-4 h-4 shrink-0" />
                       {formatDate(followup.next_followup_date)}
                     </span>
                   </div>
@@ -122,7 +122,7 @@ export default function MyFollowups() {
                     e.stopPropagation()
                     navigate(`/leads/${followup.id}/followup`)
                   }}
-                  className="btn btn-primary"
+                  className="btn btn-primary self-start shrink-0"
                 >
                   Add Follow-up
                 </button>

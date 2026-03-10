@@ -112,88 +112,146 @@ export default function UserManagement() {
         <div className="card p-8 text-center text-gray-500">Loading...</div>
       ) : (
         <div className="card">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Phone</th>
-                <th>Password</th>
-                <th>Status</th>
-                <th>Created</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {users?.map((user) => (
-                <tr key={user.id}>
-                  <td className="font-medium">{user.name}</td>
-                  <td>{user.email}</td>
-                  <td className="capitalize">{user.role}</td>
-                  <td>{user.phone || '-'}</td>
-                  <td>
-                    {user.password_plain ? (
+          {/* Mobile card view */}
+          <div className="md:hidden divide-y divide-gray-200">
+            {users?.map((user) => (
+              <div key={user.id} className="p-4 space-y-2">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="font-semibold text-gray-900">{user.name}</p>
+                    <p className="text-sm text-gray-500">{user.email}</p>
+                  </div>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}>
+                    {user.is_active ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600">
+                  <span className="capitalize"><strong>Role:</strong> {user.role}</span>
+                  <span><strong>Phone:</strong> {user.phone || '-'}</span>
+                  <span><strong>Created:</strong> {formatDate(user.created_at)}</span>
+                </div>
+                {user.password_plain && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <strong className="text-gray-600">Password:</strong>
+                    <span className="font-mono">
+                      {visiblePasswords[user.id] ? user.password_plain : '••••••••'}
+                    </span>
+                    <button
+                      onClick={() => togglePasswordVisibility(user.id)}
+                      className="p-1 text-gray-400 hover:text-gray-700"
+                    >
+                      {visiblePasswords[user.id] ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                )}
+                <div className="flex gap-2 pt-1 border-t border-gray-100">
+                  <button
+                    onClick={() => toggleUserStatus(user)}
+                    className={`flex items-center gap-1 px-3 py-1.5 rounded text-sm ${
+                      user.is_active ? 'text-red-600 hover:bg-red-50' : 'text-green-600 hover:bg-green-50'
+                    }`}
+                  >
+                    {user.is_active ? <FiUserX className="w-4 h-4" /> : <FiUserCheck className="w-4 h-4" />}
+                    {user.is_active ? 'Deactivate' : 'Activate'}
+                  </button>
+                  <button
+                    onClick={() => { setResetPasswordUser(user); setNewPassword('') }}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded text-sm text-blue-600 hover:bg-blue-50"
+                  >
+                    <FiKey className="w-4 h-4" /> Reset Password
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop table view */}
+          <div className="hidden md:block">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Phone</th>
+                  <th>Password</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {users?.map((user) => (
+                  <tr key={user.id}>
+                    <td className="font-medium">{user.name}</td>
+                    <td>{user.email}</td>
+                    <td className="capitalize">{user.role}</td>
+                    <td>{user.phone || '-'}</td>
+                    <td>
+                      {user.password_plain ? (
+                        <div className="flex items-center gap-1">
+                          <span className="font-mono text-sm">
+                            {visiblePasswords[user.id] ? user.password_plain : '••••••••'}
+                          </span>
+                          <button
+                            onClick={() => togglePasswordVisibility(user.id)}
+                            className="p-1 text-gray-400 hover:text-gray-700"
+                            title={visiblePasswords[user.id] ? 'Hide' : 'Show'}
+                          >
+                            {visiblePasswords[user.id] ? (
+                              <FiEyeOff className="w-4 h-4" />
+                            ) : (
+                              <FiEye className="w-4 h-4" />
+                            )}
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-gray-400 text-sm">-</span>
+                      )}
+                    </td>
+                    <td>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        user.is_active
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {user.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td>{formatDate(user.created_at)}</td>
+                    <td>
                       <div className="flex items-center gap-1">
-                        <span className="font-mono text-sm">
-                          {visiblePasswords[user.id] ? user.password_plain : '••••••••'}
-                        </span>
                         <button
-                          onClick={() => togglePasswordVisibility(user.id)}
-                          className="p-1 text-gray-400 hover:text-gray-700"
-                          title={visiblePasswords[user.id] ? 'Hide' : 'Show'}
+                          onClick={() => toggleUserStatus(user)}
+                          className={`p-2 rounded ${
+                            user.is_active
+                              ? 'text-red-600 hover:bg-red-50'
+                              : 'text-green-600 hover:bg-green-50'
+                          }`}
+                          title={user.is_active ? 'Deactivate' : 'Activate'}
                         >
-                          {visiblePasswords[user.id] ? (
-                            <FiEyeOff className="w-4 h-4" />
+                          {user.is_active ? (
+                            <FiUserX className="w-5 h-5" />
                           ) : (
-                            <FiEye className="w-4 h-4" />
+                            <FiUserCheck className="w-5 h-5" />
                           )}
                         </button>
+                        <button
+                          onClick={() => { setResetPasswordUser(user); setNewPassword('') }}
+                          className="p-2 rounded text-blue-600 hover:bg-blue-50"
+                          title="Reset Password"
+                        >
+                          <FiKey className="w-5 h-5" />
+                        </button>
                       </div>
-                    ) : (
-                      <span className="text-gray-400 text-sm">-</span>
-                    )}
-                  </td>
-                  <td>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      user.is_active
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {user.is_active ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td>{formatDate(user.created_at)}</td>
-                  <td>
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => toggleUserStatus(user)}
-                        className={`p-2 rounded ${
-                          user.is_active
-                            ? 'text-red-600 hover:bg-red-50'
-                            : 'text-green-600 hover:bg-green-50'
-                        }`}
-                        title={user.is_active ? 'Deactivate' : 'Activate'}
-                      >
-                        {user.is_active ? (
-                          <FiUserX className="w-5 h-5" />
-                        ) : (
-                          <FiUserCheck className="w-5 h-5" />
-                        )}
-                      </button>
-                      <button
-                        onClick={() => { setResetPasswordUser(user); setNewPassword('') }}
-                        className="p-2 rounded text-blue-600 hover:bg-blue-50"
-                        title="Reset Password"
-                      >
-                        <FiKey className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

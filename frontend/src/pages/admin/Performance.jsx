@@ -18,7 +18,7 @@ export default function Performance() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Salesperson Performance</h1>
+      <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-6">Salesperson Performance</h1>
 
       <GlobalFilters showLeadFilters={false} />
 

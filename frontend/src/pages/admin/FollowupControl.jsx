@@ -103,16 +103,16 @@ export default function FollowupControl() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Follow-up Control</h1>
-        <label className="flex items-center gap-2">
+        <label className="flex items-center gap-2 cursor-pointer">
           <input
             type="checkbox"
             checked={overdueOnly}
             onChange={(e) => setOverdueOnly(e.target.checked)}
             className="w-4 h-4 text-primary-600 rounded"
           />
-          <span>Show overdue only</span>
+          <span className="text-sm">Show overdue only</span>
         </label>
       </div>
 

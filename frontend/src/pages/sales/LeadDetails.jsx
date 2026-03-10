@@ -123,24 +123,24 @@ export default function LeadDetails() {
 
       {/* Header */}
       <div className="card mb-6">
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{lead.customer_name}</h1>
-            <div className="flex items-center gap-4 mt-2 text-gray-600">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900 truncate">{lead.customer_name}</h1>
+            <div className="flex flex-wrap items-center gap-3 mt-2 text-gray-600 text-sm">
               <span className="flex items-center gap-1">
-                <FiPhone className="w-4 h-4" />
+                <FiPhone className="w-4 h-4 shrink-0" />
                 {lead.phone_number}
               </span>
               <span className="flex items-center gap-1">
-                <FiMapPin className="w-4 h-4" />
+                <FiMapPin className="w-4 h-4 shrink-0" />
                 {lead.site_location_name}, {lead.area}
               </span>
               <span className="flex items-center gap-1">
-                <FiUser className="w-4 h-4" />
+                <FiUser className="w-4 h-4 shrink-0" />
                 {lead.sales_person_name}
               </span>
             </div>
-            <div className="flex gap-2 mt-3">
+            <div className="flex flex-wrap gap-2 mt-3">
               <StatusBadge status={lead.lead_type} statusList={LEAD_TYPES} />
               <StatusBadge status={lead.lead_status} statusList={LEAD_STATUSES} />
               <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
@@ -148,7 +148,7 @@ export default function LeadDetails() {
               </span>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2 shrink-0">
             <button
               onClick={() => navigate(`/leads/${id}/edit`)}
               className="btn btn-secondary flex items-center gap-2"
@@ -178,13 +178,13 @@ export default function LeadDetails() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Lead Info */}
-        <div className="col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-6">
           {/* Details */}
           <div className="card">
             <h2 className="text-lg font-semibold mb-4">Lead Details</h2>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm text-gray-500">Builder Type</label>
                 <p className="font-medium capitalize">{lead.builder_type}</p>
@@ -231,8 +231,8 @@ export default function LeadDetails() {
               <div className="space-y-4">
                 {visits.map((visit) => (
                   <div key={visit.id} className="p-4 bg-gray-50 rounded-lg">
-                    <div className="flex justify-between items-start">
-                      <div>
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1">
+                      <div className="flex-1 min-w-0">
                         <p className="font-medium">{formatDateTime(visit.visit_date)}</p>
                         <p className="text-sm text-gray-600 mt-1">{visit.remarks}</p>
                         {visit.next_followup_date && (
@@ -241,7 +241,7 @@ export default function LeadDetails() {
                           </p>
                         )}
                       </div>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-gray-500 shrink-0">
                         Stage: {CONSTRUCTION_STAGES.find(s => s.value === visit.construction_stage_at_visit)?.label}
                       </span>
                     </div>

@@ -36,7 +36,7 @@ export default function MySales() {
       <GlobalFilters showLeadFilters={false} />
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="card text-center">
           <p className="text-sm text-gray-500">Total Entries</p>
           <p className="text-2xl font-bold text-gray-900">{data?.total || 0}</p>

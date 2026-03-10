@@ -48,7 +48,7 @@ export default function AdminDashboard() {
       <GlobalFilters showLeadFilters={false} />
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <KPICard
           label={kpis?.total_leads?.label || 'Total Leads'}
           value={kpis?.total_leads?.value || 0}
@@ -146,7 +146,7 @@ export default function AdminDashboard() {
       {/* Counts Summary */}
       <div className="card mb-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Lead Summary</h2>
-        <div className="grid grid-cols-6 gap-4">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
           <div className="text-center p-3 bg-green-50 rounded-lg">
             <p className="text-2xl font-bold text-green-600">{kpis?.total_won?.value || 0}</p>
             <p className="text-sm text-gray-600">Total Won</p>
@@ -174,7 +174,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Sales Trend */}
         <div className="card">
           <h2 className="text-lg font-semibold mb-4">Sales Trend</h2>

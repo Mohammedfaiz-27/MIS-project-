@@ -106,7 +106,7 @@ export default function LeadsList() {
           className="btn btn-primary flex items-center gap-2"
         >
           <FiPlus className="w-4 h-4" />
-          New Lead
+          <span className="hidden sm:inline">New </span>Lead
         </button>
       </div>
 

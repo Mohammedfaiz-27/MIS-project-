@@ -25,7 +25,7 @@ export default function AreaAnalysis() {
 
       <GlobalFilters showLeadFilters={false} />
 
-      <div className="grid grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Leads by Area */}
         <div className="card">
           <h2 className="text-lg font-semibold mb-4">Leads by Area</h2>

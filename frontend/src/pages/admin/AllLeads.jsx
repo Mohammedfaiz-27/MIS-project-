@@ -133,22 +133,22 @@ export default function AllLeads() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h1 className="text-2xl font-bold text-gray-900">All Leads</h1>
         <div className="flex gap-2">
           <button
             onClick={() => handleExport('excel')}
-            className="btn btn-secondary flex items-center gap-2"
+            className="btn btn-secondary flex items-center gap-2 text-sm"
           >
             <FiDownload className="w-4 h-4" />
-            Export Excel
+            <span className="hidden sm:inline">Export </span>Excel
           </button>
           <button
             onClick={() => handleExport('csv')}
-            className="btn btn-secondary flex items-center gap-2"
+            className="btn btn-secondary flex items-center gap-2 text-sm"
           >
             <FiDownload className="w-4 h-4" />
-            Export CSV
+            <span className="hidden sm:inline">Export </span>CSV
           </button>
         </div>
       </div>
