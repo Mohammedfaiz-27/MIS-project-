@@ -51,7 +51,7 @@ export default function Login() {
                   }
                 })}
                 className="input"
-                placeholder="you@example.com"
+                placeholder="username@arckitraders.com"
               />
               {errors.email && (
                 <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>

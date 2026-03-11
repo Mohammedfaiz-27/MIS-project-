@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Query
 from typing import Optional, List
-from datetime import datetime
+from datetime import datetime, date
 
 from ..schemas.dashboard import (
     KPIResponse, FollowupTableResponse, SalespersonPerformance,
@@ -15,8 +15,8 @@ router = APIRouter()
 
 @router.get("/kpis", response_model=KPIResponse)
 async def get_kpis(
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
     sales_person_id: Optional[str] = None,
     area: Optional[str] = None,
     current_user: dict = Depends(get_current_active_user)
@@ -24,8 +24,8 @@ async def get_kpis(
     """Get KPI data for dashboard."""
     return await DashboardService.get_kpis(
         user=current_user,
-        start_date=start_date,
-        end_date=end_date,
+        start_date=datetime.combine(start_date, datetime.min.time()) if start_date else None,
+        end_date=datetime.combine(end_date, datetime.max.time()) if end_date else None,
         sales_person_id=sales_person_id,
         area=area
     )
@@ -65,30 +65,30 @@ async def get_followup_table(
 
 @router.get("/salesperson-performance", response_model=List[SalespersonPerformance])
 async def get_salesperson_performance(
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
     area: Optional[str] = None,
     current_user: dict = Depends(require_admin)
 ):
     """Get performance metrics by salesperson (admin only)."""
     return await DashboardService.get_salesperson_performance(
-        start_date=start_date,
-        end_date=end_date,
+        start_date=datetime.combine(start_date, datetime.min.time()) if start_date else None,
+        end_date=datetime.combine(end_date, datetime.max.time()) if end_date else None,
         area=area
     )
 
 
 @router.get("/area-analysis", response_model=List[AreaAnalysis])
 async def get_area_analysis(
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
     sales_person_id: Optional[str] = None,
     current_user: dict = Depends(require_admin)
 ):
     """Get area-wise analysis (admin only)."""
     return await DashboardService.get_area_analysis(
-        start_date=start_date,
-        end_date=end_date,
+        start_date=datetime.combine(start_date, datetime.min.time()) if start_date else None,
+        end_date=datetime.combine(end_date, datetime.max.time()) if end_date else None,
         sales_person_id=sales_person_id
     )
 
@@ -111,13 +111,13 @@ async def get_sales_trend(
 
 @router.get("/charts/contribution", response_model=ContributionData)
 async def get_contribution(
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
     current_user: dict = Depends(require_admin)
 ):
     """Get contribution percentages by salesperson (admin only)."""
     data = await DashboardService.get_contribution_data(
-        start_date=start_date,
-        end_date=end_date
+        start_date=datetime.combine(start_date, datetime.min.time()) if start_date else None,
+        end_date=datetime.combine(end_date, datetime.max.time()) if end_date else None,
     )
     return {"data": data}

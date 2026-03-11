@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Depends, UploadFile, File, Query
 from typing import Optional, List
-from datetime import datetime
+from datetime import datetime, date
 import os
 import uuid
 import aiofiles
@@ -27,8 +27,8 @@ async def get_leads(
     lead_status: Optional[str] = None,
     sales_person_id: Optional[str] = None,
     search: Optional[str] = None,
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
     current_user: dict = Depends(get_current_active_user)
 ):
     """Get leads with filters and pagination."""
@@ -41,8 +41,8 @@ async def get_leads(
         lead_status=lead_status,
         sales_person_id=sales_person_id,
         search=search,
-        start_date=start_date,
-        end_date=end_date
+        start_date=datetime.combine(start_date, datetime.min.time()) if start_date else None,
+        end_date=datetime.combine(end_date, datetime.max.time()) if end_date else None,
     )
 
     leads = [serialize_doc(lead) for lead in result["leads"]]

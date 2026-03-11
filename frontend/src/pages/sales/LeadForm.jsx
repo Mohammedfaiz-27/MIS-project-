@@ -449,12 +449,16 @@ export default function LeadForm() {
                 )}
               </div>
               <div>
-                <label className="label">Lead Status</label>
-                <select {...register('lead_status')} className="input">
+                <label className="label">Lead Status *</label>
+                <select {...register('lead_status', { required: 'Required' })} className="input">
+                  <option value="">Select Status</option>
                   {LEAD_STATUSES.map(s => (
                     <option key={s.value} value={s.value}>{s.label}</option>
                   ))}
                 </select>
+                {errors.lead_status && (
+                  <p className="text-red-500 text-sm mt-1">{errors.lead_status.message}</p>
+                )}
               </div>
             </div>
           </div>
@@ -509,10 +513,12 @@ export default function LeadForm() {
               <h2 className="text-lg font-semibold mb-4">Follow-up</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="label">Next Follow-up Date</label>
+                  <label className="label">Next Follow-up Date *</label>
                   <input
                     type="datetime-local"
-                    {...register('next_followup_date')}
+                    {...register('next_followup_date', {
+                      required: leadStatus === 'follow_up' ? 'Required' : false
+                    })}
                     className="input"
                   />
                   {errors.next_followup_date && (

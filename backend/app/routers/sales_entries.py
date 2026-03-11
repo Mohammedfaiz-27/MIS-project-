@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Depends, Query
 from typing import Optional, List
-from datetime import datetime
+from datetime import datetime, date
 from bson import ObjectId
 
 from ..schemas.sales_entry import (
@@ -116,8 +116,8 @@ async def get_all_entries(
     page_size: int = Query(20, ge=1, le=100),
     approval_status: Optional[str] = None,
     sales_person_id: Optional[str] = None,
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
     current_user: dict = Depends(get_current_active_user)
 ):
     """Get all sales entries with filters."""
@@ -137,9 +137,9 @@ async def get_all_entries(
     if start_date or end_date:
         date_filter = {}
         if start_date:
-            date_filter["$gte"] = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            date_filter["$gte"] = datetime.combine(start_date, datetime.min.time())
         if end_date:
-            date_filter["$lte"] = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
+            date_filter["$lte"] = datetime.combine(end_date, datetime.max.time())
         filter_dict["created_at"] = date_filter
 
     # Get total count

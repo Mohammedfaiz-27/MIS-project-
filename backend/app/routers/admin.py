@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status, Depends, Query
 from fastapi.responses import StreamingResponse
 from typing import Optional, List
-from datetime import datetime
+from datetime import datetime, date
 from bson import ObjectId
 import io
 
@@ -77,8 +77,8 @@ async def update_user(
 @router.get("/export/leads")
 async def export_leads(
     format: str = Query("excel", regex="^(excel|csv)$"),
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
     sales_person_id: Optional[str] = None,
     area: Optional[str] = None,
     current_user: dict = Depends(require_admin)
@@ -95,9 +95,9 @@ async def export_leads(
     if start_date or end_date:
         date_filter = {}
         if start_date:
-            date_filter["$gte"] = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            date_filter["$gte"] = datetime.combine(start_date, datetime.min.time())
         if end_date:
-            date_filter["$lte"] = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
+            date_filter["$lte"] = datetime.combine(end_date, datetime.max.time())
         filter_dict["created_at"] = date_filter
 
     # Get leads with user info
@@ -216,8 +216,8 @@ async def export_leads(
 @router.get("/export/sales-entries")
 async def export_sales_entries(
     format: str = Query("excel", regex="^(excel|csv)$"),
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
     sales_person_id: Optional[str] = None,
     approval_status: Optional[str] = None,
     current_user: dict = Depends(require_admin)
@@ -234,9 +234,9 @@ async def export_sales_entries(
     if start_date or end_date:
         date_filter = {}
         if start_date:
-            date_filter["$gte"] = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            date_filter["$gte"] = datetime.combine(start_date, datetime.min.time())
         if end_date:
-            date_filter["$lte"] = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
+            date_filter["$lte"] = datetime.combine(end_date, datetime.max.time())
         filter_dict["created_at"] = date_filter
 
     # Get entries with lookup
