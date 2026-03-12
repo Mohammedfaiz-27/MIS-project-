@@ -24,6 +24,8 @@ export default function LeadForm() {
   const [newCite, setNewCement] = useState('')
   const [selectedFiles, setSelectedFiles] = useState([])
   const [filePreviews, setFilePreviews] = useState([])
+  const [gpsLocation, setGpsLocation] = useState(null)
+  const [gpsStatus, setGpsStatus] = useState('idle') // idle | capturing | captured | denied | unavailable
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm()
 
@@ -58,6 +60,33 @@ export default function LeadForm() {
       })
     }
   }, [existingLead, reset])
+
+  // Capture GPS on new lead creation
+  useEffect(() => {
+    if (isEdit) return
+    if (!navigator.geolocation) {
+      setGpsStatus('unavailable')
+      return
+    }
+    setGpsStatus('capturing')
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude
+        const lng = pos.coords.longitude
+        setGpsLocation({
+          latitude: lat,
+          longitude: lng,
+          maps_link: `https://www.google.com/maps?q=${lat},${lng}`,
+          captured_at: new Date().toISOString()
+        })
+        setGpsStatus('captured')
+      },
+      () => {
+        setGpsStatus('denied')
+      },
+      { timeout: 10000, maximumAge: 0, enableHighAccuracy: true }
+    )
+  }, [isEdit])
 
   // Mutation for adding master data
   const addMasterDataMutation = useMutation({
@@ -178,6 +207,10 @@ export default function LeadForm() {
       delete payload.next_followup_date
     }
 
+    if (!isEdit && gpsLocation) {
+      payload.location = gpsLocation
+    }
+
     if (isEdit) {
       updateMutation.mutate({ id, data: payload })
     } else {
@@ -202,9 +235,25 @@ export default function LeadForm() {
       </button>
 
       <div className="card max-w-3xl">
-        <h1 className="text-xl font-bold text-gray-900 mb-6">
-          {isEdit ? 'Edit Lead' : 'Create New Lead'}
-        </h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-xl font-bold text-gray-900">
+            {isEdit ? 'Edit Lead' : 'Create New Lead'}
+          </h1>
+          {!isEdit && (
+            <span className={`flex items-center gap-1.5 text-xs px-2 py-1 rounded-full ${
+              gpsStatus === 'captured' ? 'bg-green-100 text-green-700' :
+              gpsStatus === 'capturing' ? 'bg-yellow-100 text-yellow-700' :
+              gpsStatus === 'denied' ? 'bg-red-100 text-red-600' :
+              gpsStatus === 'unavailable' ? 'bg-gray-100 text-gray-500' : 'bg-gray-100 text-gray-400'
+            }`}>
+              {gpsStatus === 'captured' && <><span>📍</span> Location captured</>}
+              {gpsStatus === 'capturing' && <><span className="animate-pulse">📍</span> Getting location…</>}
+              {gpsStatus === 'denied' && <><span>📍</span> Location denied</>}
+              {gpsStatus === 'unavailable' && <><span>📍</span> GPS unavailable</>}
+              {gpsStatus === 'idle' && null}
+            </span>
+          )}
+        </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Site Details */}

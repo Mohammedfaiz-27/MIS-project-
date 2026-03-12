@@ -222,6 +222,26 @@ export default function LeadDetails() {
                 <p className="mt-1 text-red-600">{lead.lost_reason}</p>
               </div>
             )}
+            {lead.location && (
+              <div className="mt-4 pt-4 border-t">
+                <label className="text-sm text-gray-500">GPS Location</label>
+                <p className="mt-1 text-sm font-medium">
+                  {lead.location.latitude.toFixed(6)}, {lead.location.longitude.toFixed(6)}
+                </p>
+                <a
+                  href={lead.location.maps_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700 mt-1"
+                >
+                  <FiMapPin className="w-3.5 h-3.5" />
+                  View on Google Maps
+                </a>
+                {lead.location.captured_at && (
+                  <p className="text-xs text-gray-400 mt-1">Captured: {formatDateTime(lead.location.captured_at)}</p>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Visit History */}

@@ -30,6 +30,7 @@ class LeadService:
             "next_followup_date": lead_data.next_followup_date,
             "visit_count": 1,
             "remarks": lead_data.remarks,
+            "location": lead_data.location.model_dump() if lead_data.location else None,
             "sales_person_id": ObjectId(sales_person_id),
             "created_at": datetime.utcnow(),
             "updated_at": None

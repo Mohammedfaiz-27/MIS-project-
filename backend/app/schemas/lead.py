@@ -5,6 +5,13 @@ import re
 from ..models.lead import ConstructionStage, LeadType, LeadStatus, BuilderType
 
 
+class LeadLocation(BaseModel):
+    latitude: float
+    longitude: float
+    maps_link: str
+    captured_at: Optional[datetime] = None
+
+
 class LeadCreate(BaseModel):
     # Site Details
     site_location_name: str = Field(..., min_length=2)
@@ -38,6 +45,9 @@ class LeadCreate(BaseModel):
     # Follow-up
     next_followup_date: Optional[datetime] = None
 
+    # Location
+    location: Optional[LeadLocation] = None
+
     # Remarks
     remarks: Optional[str] = None
 
@@ -58,6 +68,7 @@ class LeadUpdate(BaseModel):
     next_followup_date: Optional[datetime] = None
     remarks: Optional[str] = None
     lost_reason: Optional[str] = None
+    location: Optional[LeadLocation] = None
 
 
 class LeadStageUpdate(BaseModel):
@@ -89,6 +100,7 @@ class LeadResponse(BaseModel):
     sales_person_name: Optional[str] = None
     remarks: Optional[str] = None
     lost_reason: Optional[str] = None
+    location: Optional[LeadLocation] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
 
