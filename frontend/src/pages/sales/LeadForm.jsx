@@ -200,6 +200,11 @@ export default function LeadForm() {
   })
 
   const onSubmit = (data) => {
+    if (!isEdit && !gpsLocation) {
+      toast.error('Location is required. Please allow location access to create a lead.')
+      return
+    }
+
     const payload = { ...data }
     if (data.next_followup_date) {
       payload.next_followup_date = new Date(data.next_followup_date).toISOString()
@@ -663,13 +668,22 @@ export default function LeadForm() {
             )}
           </div>
 
+          {!isEdit && (gpsStatus === 'denied' || gpsStatus === 'unavailable') && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
+              <strong>Location access is required</strong> to create a new lead.
+              {gpsStatus === 'denied'
+                ? ' Please enable location permission in your browser settings and refresh the page.'
+                : ' GPS is not available on this device.'}
+            </div>
+          )}
+
           <div className="flex gap-4">
             <button
               type="submit"
-              disabled={isLoading}
-              className="btn btn-primary"
+              disabled={isLoading || (!isEdit && gpsStatus !== 'captured')}
+              className="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Saving...' : (isEdit ? 'Update Lead' : 'Create Lead')}
+              {isLoading ? 'Saving...' : (!isEdit && gpsStatus === 'capturing') ? 'Getting location...' : (isEdit ? 'Update Lead' : 'Create Lead')}
             </button>
             <button
               type="button"
