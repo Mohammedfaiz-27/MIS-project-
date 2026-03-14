@@ -1,0 +1,9 @@
+{
+  "appId": "com.arckitraders.mis",
+  "appName": "Arcki Traders",
+  "webDir": "dist",
+  "server": {
+    "url": "https://mis-project-puce.vercel.app",
+    "cleartext": true
+  }
+}

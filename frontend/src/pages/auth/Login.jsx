@@ -23,7 +23,7 @@ export default function Login() {
       toast.success('Login successful!')
       navigate(user.role === 'admin' ? '/admin/dashboard' : '/leads')
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Invalid credentials')
+      toast.error(error.response?.data?.detail || error.message || JSON.stringify(error))
     } finally {
       setIsLoading(false)
     }
