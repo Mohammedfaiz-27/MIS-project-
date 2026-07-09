@@ -129,6 +129,64 @@ class DashboardService:
         }
 
     @staticmethod
+    async def get_today_summary(user: dict) -> Dict[str, Any]:
+        """Get today-focused KPI summary for the dashboard overview section."""
+        db = get_database()
+        today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+        today_end = today_start.replace(hour=23, minute=59, second=59, microsecond=999999)
+
+        # Build base filter (salesperson sees only their own data)
+        lead_filter = {}
+        if user.get("role") == UserRole.SALESPERSON:
+            lead_filter["sales_person_id"] = user["_id"]
+
+        # New leads created today
+        new_leads_filter = {
+            **lead_filter,
+            "created_at": {"$gte": today_start, "$lte": today_end}
+        }
+        new_leads_today = await db.leads.count_documents(new_leads_filter)
+
+        # Follow-ups due today
+        followups_due_filter = {
+            **lead_filter,
+            "lead_status": LeadStatus.FOLLOW_UP,
+            "next_followup_date": {"$gte": today_start, "$lte": today_end}
+        }
+        followups_due_today = await db.leads.count_documents(followups_due_filter)
+
+        # Overdue follow-ups (reuse same definition as get_kpis)
+        overdue_filter = {
+            **lead_filter,
+            "lead_status": LeadStatus.FOLLOW_UP,
+            "next_followup_date": {"$lt": today_start}
+        }
+        overdue_followups = await db.leads.count_documents(overdue_filter)
+
+        # Sales won today: sales entries approved today
+        entry_filter = {}
+        if user.get("role") == UserRole.SALESPERSON:
+            entry_filter["sales_person_id"] = user["_id"]
+        entry_filter["approval_status"] = ApprovalStatus.APPROVED
+        entry_filter["approval_date"] = {"$gte": today_start, "$lte": today_end}
+        sales_won_today = await db.sales_entries.count_documents(entry_filter)
+
+        # Pending approvals (admin only, same definition as get_kpis)
+        pending_approvals = 0
+        if user.get("role") == UserRole.ADMIN:
+            pending_approvals = await db.sales_entries.count_documents({
+                "approval_status": ApprovalStatus.PENDING
+            })
+
+        return {
+            "new_leads_today": {"label": "New Leads Today", "value": new_leads_today},
+            "followups_due_today": {"label": "Follow-ups Due Today", "value": followups_due_today},
+            "overdue_followups": {"label": "Overdue Follow-ups", "value": overdue_followups},
+            "sales_won_today": {"label": "Sales Won Today", "value": sales_won_today},
+            "pending_approvals": {"label": "Pending Approvals", "value": pending_approvals}
+        }
+
+    @staticmethod
     async def get_followup_table(
         user: dict,
         page: int = 1,

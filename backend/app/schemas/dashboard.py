@@ -24,6 +24,14 @@ class KPIResponse(BaseModel):
     total_won: KPICard
 
 
+class TodaySummaryResponse(BaseModel):
+    new_leads_today: KPICard
+    followups_due_today: KPICard
+    overdue_followups: KPICard
+    sales_won_today: KPICard
+    pending_approvals: KPICard
+
+
 class FollowupTableItem(BaseModel):
     lead_id: str
     site_location_name: str

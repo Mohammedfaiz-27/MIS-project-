@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { salesEntriesService } from '../../services/salesEntries'
 import { useFilterStore } from '../../store/filterStore'
 import DataTable from '../../components/common/DataTable'
@@ -14,9 +14,10 @@ import toast from 'react-hot-toast'
 
 export default function SalesApprovals() {
   const navigate = useNavigate()
+  const location = useLocation()
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
-  const [statusFilter, setStatusFilter] = useState('pending')
+  const [statusFilter, setStatusFilter] = useState(location.state?.statusFilter || 'pending')
   const [rejectModal, setRejectModal] = useState({ isOpen: false, entryId: null })
   const [rejectReason, setRejectReason] = useState('')
   const { filters } = useFilterStore()
