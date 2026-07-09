@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { dashboardService } from '../../services/dashboard'
 import { useFilterStore } from '../../store/filterStore'
 import DataTable from '../../components/common/DataTable'
@@ -12,8 +12,9 @@ import { FiEye, FiAlertCircle } from 'react-icons/fi'
 
 export default function FollowupControl() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [page, setPage] = useState(1)
-  const [overdueOnly, setOverdueOnly] = useState(false)
+  const [overdueOnly, setOverdueOnly] = useState(!!location.state?.overdueOnly)
   const { filters } = useFilterStore()
 
   const { data, isLoading } = useQuery({

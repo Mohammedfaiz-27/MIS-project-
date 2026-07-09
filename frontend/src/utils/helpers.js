@@ -46,6 +46,14 @@ export const downloadBlob = (blob, filename) => {
   window.URL.revokeObjectURL(url)
 }
 
+export const getGreeting = (name) => {
+  const hour = new Date().getHours()
+  const timeGreeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+  const dateLabel = format(new Date(), 'd MMMM yyyy')
+  const firstName = name ? name.split(' ')[0] : ''
+  return `${timeGreeting}${firstName ? `, ${firstName} \u{1F44B}` : ''} \u00b7 ${dateLabel}`
+}
+
 export const buildQueryParams = (filters) => {
   const params = {}
   Object.entries(filters).forEach(([key, value]) => {

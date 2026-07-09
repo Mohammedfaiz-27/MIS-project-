@@ -6,6 +6,11 @@ export const dashboardService = {
     return response.data
   },
 
+  getTodaySummary: async () => {
+    const response = await api.get('/dashboard/today-summary')
+    return response.data
+  },
+
   getFollowupTable: async (params = {}) => {
     const response = await api.get('/dashboard/followup-table', { params })
     return response.data

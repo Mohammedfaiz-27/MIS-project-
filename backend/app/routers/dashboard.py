@@ -3,7 +3,7 @@ from typing import Optional, List
 from datetime import datetime, date
 
 from ..schemas.dashboard import (
-    KPIResponse, FollowupTableResponse, SalespersonPerformance,
+    KPIResponse, TodaySummaryResponse, FollowupTableResponse, SalespersonPerformance,
     AreaAnalysis, SalesTrend, ContributionData
 )
 from ..services.dashboard_service import DashboardService
@@ -29,6 +29,14 @@ async def get_kpis(
         sales_person_id=sales_person_id,
         area=area
     )
+
+
+@router.get("/today-summary", response_model=TodaySummaryResponse)
+async def get_today_summary(
+    current_user: dict = Depends(get_current_active_user)
+):
+    """Get today-focused KPI summary (new leads, follow-ups due, sales won today, etc)."""
+    return await DashboardService.get_today_summary(user=current_user)
 
 
 @router.get("/followup-table", response_model=FollowupTableResponse)

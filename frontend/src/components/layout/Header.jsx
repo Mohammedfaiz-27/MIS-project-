@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { FiLogOut, FiMenu } from 'react-icons/fi'
+import { getGreeting } from '../../utils/helpers'
 
 export default function Header({ onMenuClick }) {
   const navigate = useNavigate()
@@ -23,7 +24,7 @@ export default function Header({ onMenuClick }) {
             <FiMenu className="w-5 h-5" />
           </button>
           <h2 className="text-base md:text-lg font-semibold text-gray-900 truncate">
-            Welcome back, {user?.name}
+            {getGreeting(user?.name)}
           </h2>
         </div>
 

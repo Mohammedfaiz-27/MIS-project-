@@ -1,4 +1,4 @@
-export default function KPICard({ label, value, icon: Icon, color = 'primary' }) {
+export default function KPICard({ label, value, icon: Icon, color = 'primary', onClick }) {
   const colorClasses = {
     primary: 'bg-primary-100 text-primary-600',
     green: 'bg-green-100 text-green-600',
@@ -9,7 +9,12 @@ export default function KPICard({ label, value, icon: Icon, color = 'primary' })
   }
 
   return (
-    <div className="card">
+    <div
+      className={`card ${onClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+    >
       <div className="flex items-center gap-4">
         <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${colorClasses[color]}`}>
           {Icon && <Icon className="w-6 h-6" />}
